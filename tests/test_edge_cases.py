@@ -218,14 +218,14 @@ class TestBoundaryConditions:
         """Test handling of unicode characters in data."""
         unicode_file = tmp_path / "unicode.csv"
         unicode_file.write_text(
-            "Disease,Symptom_1\nDiabétes,Févre\nHypertensión,Dolor de cabeza")
+            "Disease,Symptom_1\nDiabétes,Févre\nHypertensión,Dolor de cabeza", encoding="utf-8")
 
         try:
             diseases, symptoms, relationships = preprocess_data(
                 str(unicode_file))
 
             assert len(diseases) == 2
-            assert len(symptoms) == 3
+            assert len(symptoms) == 2
             assert len(relationships) == 2
 
             # Check that unicode characters are preserved
