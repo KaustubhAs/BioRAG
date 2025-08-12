@@ -27,14 +27,8 @@ STREAMLIT_HOST = "localhost"
 STREAMLIT_THEME = "light"
 
 # Visualization
-NODE_COLORS = {
-    "Disease": "red",
-    "Symptom": "blue"
-}
-NODE_SIZES = {
-    "Disease": 15,
-    "Symptom": 10
-}
+NODE_COLORS = {"Disease": "red", "Symptom": "blue"}
+NODE_SIZES = {"Disease": 15, "Symptom": 10}
 
 # Response Configuration
 MAX_RESPONSE_LENGTH = 1000
@@ -42,4 +36,4 @@ INCLUDE_CONFIDENCE_SCORES = True
 
 # Development
 DEBUG_MODE = os.getenv("DEBUG", "False").lower() == "true"
-LOG_LEVEL = "INFO" 
+LOG_LEVEL = "INFO"
