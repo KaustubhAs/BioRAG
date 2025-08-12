@@ -2,6 +2,10 @@ name: Formatting Python Code
 
 on: push
 
+permissions:
+  contents: write  # ✅ Allow pushing changes
+
+
 jobs:
   autoyapf:
     runs-on: ubuntu-latest
