@@ -1,22 +1,22 @@
-# 🏥 Biomedical Assistant
+# Biomedical Assistant
 
 A **Retrieval-Augmented Generation (RAG) system** for biomedical information that combines a knowledge graph with natural language processing to answer questions about diseases and symptoms. Built with a robust fallback mechanism ensuring >95% response reliability, processing 10,000+ biomedical entities from structured data.
 
-## 🎯 Project Overview
+## Project Overview
 
 This biomedical query answering assistant leverages **Knowledge Graph and RAG with LLM** technology to provide intelligent responses about medical conditions. The system implements a **robust fallback mechanism** to ensure >95% response reliability, processing **10,000+ biomedical entities** from structured data. Built with a **StreamLit UI**, supporting scalable biomedical data and automated knowledge extraction.
 
-## 📊 System Statistics
+## System Statistics
 
-- **📈 Total Data Records**: 4,920 disease-symptom relationships
-- **🏥 Unique Diseases**: 41 medical conditions
-- **🩺 Unique Symptoms**: 131 distinct symptoms
-- **🔗 Potential Relationships**: 83,640 disease-symptom connections
-- **⚡ Response Reliability**: >95% through multi-tier fallback system
-- **🤖 LLM Integration**: Ollama with llama3.2 model
-- **📱 Interface Options**: Web UI (Streamlit) + Command Line Interface
+- **Total Data Records**: 4,920 disease-symptom relationships
+- **Unique Diseases**: 41 medical conditions
+- **Unique Symptoms**: 131 distinct symptoms
+- **Potential Relationships**: 83,640 disease-symptom connections
+- **Response Reliability**: >95% through multi-tier fallback system
+- **LLM Integration**: Ollama with llama3.2 model
+- **Interface Options**: Web UI (Streamlit) + Command Line Interface
 
-## ✨ Key Features
+## Key Features
 
 ### **Interactive Knowledge Graph**
 - **Visual Exploration**: Interactive network visualization with 41 diseases (red nodes) and 131 symptoms (blue nodes)
@@ -41,13 +41,13 @@ This biomedical query answering assistant leverages **Knowledge Graph and RAG wi
 - **Cross-platform Support**: Windows, Mac, Linux compatibility
 - **Memory Efficient**: Cached knowledge graph loading for optimal performance
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+┌─────────────────┐     ┌─────────────────┐     ┌───────────────────┐
 │   User Input    │───▶│  Query Processor │───▶│ Response Generator│
-│  (Natural Lang) │    │  (Multi-tier)   │    │  (LLM + Rules)  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+│  (Natural Lang) │     │  (Multi-tier)   │     │  (LLM + Rules)    │
+└─────────────────┘     └─────────────────┘     └───────────────────┘
                               │                        │
                               ▼                        ▼
                        ┌─────────────────┐    ┌─────────────────┐
@@ -68,7 +68,7 @@ This biomedical query answering assistant leverages **Knowledge Graph and RAG wi
 2. **Rule-based Secondary**: Structured responses when LLM unavailable
 3. **Text-based Tertiary**: Simple matching for maximum reliability
 
-## 🛠️ Technical Stack
+## Technical Stack
 
 ### **Core Technologies**
 - **Python 3.8+**: Primary development language
@@ -89,7 +89,7 @@ This biomedical query answering assistant leverages **Knowledge Graph and RAG wi
 - **Transformers 4.35.2**: Hugging Face model integration
 - **PyTorch 2.1.0**: Deep learning framework
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 BiomedicalAssistant/
@@ -130,7 +130,7 @@ BiomedicalAssistant/
 └── README.md                   # This file
 ```
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### **Prerequisites**
 - Python 3.8 or higher
@@ -165,7 +165,7 @@ BiomedicalAssistant/
    python main.py --mode cli
    ```
 
-## 💻 Usage
+##  Usage
 
 ### **Web Interface (Recommended)**
 
@@ -182,14 +182,14 @@ python main.py --mode ui
 streamlit run app/streamlit_app.py
 ```
 
-#### **🏥 Knowledge Graph Page**
+#### **Knowledge Graph Page**
 - **Interactive Visualization**: Explore 41 diseases and 131 symptoms
 - **Smart Filtering**: Toggle node visibility with real-time updates
 - **Advanced Search**: Find specific medical entities instantly
 - **Graph Analytics**: View top diseases by symptom count
 - **Zoom & Pan**: Navigate complex medical relationships smoothly
 
-#### **🤖 Q&A Interface Page**
+#### **Q&A Interface Page**
 - **Natural Language Queries**: Ask questions in plain English
 - **Intelligent Responses**: Powered by RAG system with >95% reliability
 - **Query History**: Persistent storage of all interactions
@@ -204,7 +204,7 @@ For traditional command-line usage:
 python main.py --mode cli
 ```
 
-## 🔬 Example Queries
+## Example Queries
 
 Try these example questions in the Q&A interface:
 
@@ -214,7 +214,7 @@ Try these example questions in the Q&A interface:
 - **"What are the symptoms of hypertension?"** → Blood pressure-related symptoms
 - **"What diseases are associated with chest pain?"** → Cardiac and respiratory conditions
 
-## ⚙️ Configuration
+## Configuration
 
 ### **LLM Setup (Optional but Recommended)**
 
@@ -236,7 +236,7 @@ To use your own biomedical dataset:
 2. Place it as `data/dataset.csv`
 3. Restart the application
 
-## 🔧 Advanced Features
+## Advanced Features
 
 ### **Fallback Mechanism Details**
 - **Tier 1**: LLM responses (Ollama llama3.2) - Most intelligent
@@ -256,7 +256,7 @@ To use your own biomedical dataset:
 - **Session State**: Efficient state management in Streamlit
 - **Memory Efficient**: Optimized for large biomedical datasets
 
-## 🧪 Testing
+## Testing
 
 Run comprehensive tests to verify system functionality:
 
@@ -269,7 +269,7 @@ python tests/test_system.py
 python tests/test_search_neighborhood.py
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### **Common Issues**
 
@@ -286,7 +286,7 @@ python tests/test_search_neighborhood.py
 - **LLM responses**: Faster with Ollama running locally
 - **Graph visualization**: Optimized for 41 diseases and 131 symptoms
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -294,15 +294,15 @@ python tests/test_search_neighborhood.py
 4. Add tests if applicable
 5. Submit a pull request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 This is a **research/educational tool** and should **NOT** be used for medical diagnosis or treatment decisions. Always consult with qualified healthcare professionals for medical advice. The system processes 4,920 biomedical records but is not a substitute for professional medical consultation.
 
-## 📈 Performance Metrics
+## Performance Metrics
 
 - **Response Time**: <2 seconds for typical queries
 - **Accuracy**: >95% response reliability through fallback system
