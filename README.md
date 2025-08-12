@@ -286,6 +286,7 @@ python tests/test_search_neighborhood.py
 - **LLM responses**: Faster with Ollama running locally
 - **Graph visualization**: Optimized for 41 diseases and 131 symptoms
 
+<!-- 
 ## Contributing
 
 1. Fork the repository
@@ -293,6 +294,7 @@ python tests/test_search_neighborhood.py
 3. Make your changes
 4. Add tests if applicable
 5. Submit a pull request
+-->
 
 ## License
 
