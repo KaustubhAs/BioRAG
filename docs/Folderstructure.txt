@@ -1,0 +1,32 @@
+```
+└── 📁BiomedicalAssistant
+    └── 📁__pycache__
+        └── app.cpython-310.pyc
+    └── 📁app
+        └── 📁__pycache__
+            └── cli.cpython-310.pyc
+        └── cli.py
+    └── 📁data
+        └── dataset.csv
+    └── 📁knowledge_graph
+        └── 📁__pycache__
+            └── data_processor.cpython-310.pyc
+            └── graph_builder.cpython-310.pyc
+            └── schema.cpython-310.pyc
+        └── data_processor.py
+        └── embeddings.py
+        └── graph_builder.py
+        └── neo4j_builder.py
+        └── schema.py
+    └── 📁rag
+        └── 📁__pycache__
+            └── biomedical_rag.cpython-310.pyc
+            └── query_processor.cpython-310.pyc
+            └── response_generator.cpython-310.pyc
+        └── biomedical_rag.py
+        └── query_processor.py
+        └── response_generator.py
+    └── build_knowledge_graph.py
+    └── data_exploration.py
+    └── main.py
+```
