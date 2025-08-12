@@ -55,7 +55,7 @@ class TestSystemPerformance:
         # Average query time should be reasonable
         avg_time = total_time / len(queries)
         assert avg_time < 6.0
-    
+
     def test_graph_traversal_performance(self, sample_graph):
         """Test graph traversal performance."""
         # Test neighborhood extraction performance
