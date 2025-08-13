@@ -1,6 +1,6 @@
 # Biomedical Assistant
 
-[![Build Status](https://github.com/KaustubhAs/BioRAG/actions/workflows/github-actions-build.yml/badge.svg)](https://github.com/KaustubhAs/BioRAG/actions)
+[![Build Status](https://github.com/KaustubhAs/BioRAG/actions/workflows/run-tests.yml/badge.svg)](https://github.com/KaustubhAs/BioRAG/actions)
 [![codecov](https://codecov.io/github/KaustubhAs/BioRAG/graph/badge.svg)](https://codecov.io/github/KaustubhAs/BioRAG)
 
 A **Retrieval-Augmented Generation (RAG) system** for biomedical information that combines a knowledge graph with natural language processing to answer questions about diseases and symptoms. Built with a robust fallback mechanism ensuring >95% response reliability, processing 10,000+ biomedical entities from structured data.
