@@ -2,6 +2,7 @@
 Performance and stress tests for Biomedical Assistant
 """
 import pytest
+import os
 import time
 import networkx as nx
 import pandas as pd
@@ -248,6 +249,7 @@ class TestBenchmarks:
 
         print(f"Query throughput: {queries_per_second:.2f} queries/second")
 
+    @pytest.mark.skipif(os.environ.get("CI") == "true", reason="Skip performance tests in CI")
     def test_memory_efficiency_benchmark(self, sample_graph):
         """Benchmark memory efficiency."""
         import psutil
