@@ -6,6 +6,7 @@
 [![Formatting python code](https://github.com/KaustubhAs/BioRAG/actions/workflows/format-python.yml/badge.svg)](https://github.com/ForkBombers/Enigma/actions/workflows/format-python.yml)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 
+#
 A **Retrieval-Augmented Generation (RAG) system** for biomedical information that combines a knowledge graph with natural language processing to answer questions about diseases and symptoms. Built with a robust fallback mechanism ensuring >95% response reliability, processing 10,000+ biomedical entities from structured data.
 
 ## Project Overview
