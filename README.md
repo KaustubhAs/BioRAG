@@ -196,12 +196,19 @@ streamlit run app/streamlit_app.py
 - **Graph Analytics**: View top diseases by symptom count
 - **Zoom & Pan**: Navigate complex medical relationships smoothly
 
+- <img width="1877" height="957" alt="Biomedical-Kn" src="https://github.com/user-attachments/assets/ab93a6d7-a899-4016-9d32-ee427c8ab701" />
+
+
+
 #### **Q&A Interface Page**
 - **Natural Language Queries**: Ask questions in plain English
 - **Intelligent Responses**: Powered by RAG system with >95% reliability
 - **Query History**: Persistent storage of all interactions
 - **Example Questions**: Quick-start for common medical queries
 - **Real-time Statistics**: Live metrics about the knowledge base
+
+- <img width="1870" height="953" alt="Biomedical-QnA" src="https://github.com/user-attachments/assets/ec7ab1de-3564-4054-bc31-ea325ef55287" />
+
 
 ### **Command Line Interface**
 
