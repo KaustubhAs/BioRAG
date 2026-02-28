@@ -102,8 +102,10 @@ class TestStreamlitApp:
                     result = initialize_system()
 
                     assert result is True
-                    mock_success.assert_called_once_with(
-                        "System initialized successfully!")
+                    mock_success.assert_called_once()
+                    msg = mock_success.call_args[0][0]
+                    assert msg.startswith("System initialized successfully!")
+                    assert "Data source:" in msg
 
     @pytest.mark.unit
     @patch('app.streamlit_app.preprocess_data')
