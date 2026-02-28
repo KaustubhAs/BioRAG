@@ -1,7 +1,7 @@
 try:
     from rag.query_processor import QueryProcessor
     QUERY_PROCESSOR_AVAILABLE = True
-except ImportError as e:
+except (ImportError, OSError) as e:
     print(f"Warning: Advanced query processor not available: {e}")
     print("Using simple text-based query processor instead.")
     from rag.query_processor_simple import SimpleQueryProcessor as QueryProcessor

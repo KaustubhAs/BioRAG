@@ -5,7 +5,7 @@ Configuration file for Biomedical Assistant
 import os
 
 # Data paths
-DATA_PATH = "data/dataset.csv"
+DATA_PATH = "data/processed/"
 KNOWLEDGE_GRAPH_PATH = "knowledge_graph/"
 
 # LLM Configuration

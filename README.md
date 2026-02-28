@@ -42,20 +42,30 @@ This biomedical query answering assistant leverages **Knowledge Graph and RAG wi
 - **Example Questions**: Quick-start buttons for common medical queries
 
 ### **Robust Architecture**
-- **Fallback Mechanism**: Ensures >95% response reliability through multiple processing tiers
+- **Fallback Mechanism**: Ensures >95% response reliability through multiple processing tiers (query processor, response generator, data write)
+- **Optional PySpark Pipeline**: Scalable CSV → Parquet preprocessing; on Windows, Parquet write falls back to Pandas/PyArrow (no Hadoop/winutils required)
 - **Scalable Processing**: Handles 10,000+ biomedical entities efficiently
-- **Automated Knowledge Extraction**: Processes structured CSV data into graph relationships
+- **Automated Knowledge Extraction**: Processes structured CSV or Parquet data into graph relationships
 - **Cross-platform Support**: Windows, Mac, Linux compatibility
 - **Memory Efficient**: Cached knowledge graph loading for optimal performance
 
 ## System Architecture
 
+### **Data pipeline (optional PySpark preprocessing)**
+
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌───────────────────┐
-│   User Input    │───▶│  Query Processor │───▶│ Response Generator│
-│  (Natural Lang) │     │  (Multi-tier)   │     │  (LLM + Rules)    │
-└─────────────────┘     └─────────────────┘     └───────────────────┘
-                              │                        │
+┌──────────────────┐     ┌─────────────────────────────────────────┐     ┌──────────────────┐
+│  data/dataset.csv│────▶│  PySpark pipeline (pipeline/spark_       │────▶│ data/processed/  │
+│  (raw CSV)       │     │  processor.py): load, clean, export     │     │ (Parquet)        │
+└──────────────────┘     │  • Write: Spark Parquet, or on Windows  │     └────────┬─────────┘
+                         │    fallback → Pandas/PyArrow (no HADOOP)│              │
+                         └─────────────────────────────────────────┘              │
+                                                                                   ▼
+┌─────────────────┐     ┌─────────────────┐     ┌───────────────────┐    ┌─────────────────┐
+│   User Input    │───▶│  Query Processor │───▶│ Response Generator │    │ App loads from   │
+│  (Natural Lang) │     │  (Multi-tier)   │     │  (LLM + Rules)     │◀───│ data/processed/  │
+└─────────────────┘     └─────────────────┘     └───────────────────┘    │ or dataset.csv  │
+                              │                        │                   └─────────────────┘
                               ▼                        ▼
                        ┌─────────────────┐    ┌─────────────────┐
                        │ Knowledge Graph │    │   LLM/LLaMA     │
@@ -64,11 +74,14 @@ This biomedical query answering assistant leverages **Knowledge Graph and RAG wi
                        └─────────────────┘    └─────────────────┘
 ```
 
+- **Data source**: If `data/processed/` exists (from the PySpark pipeline), the app uses it and shows *"Data source: Parquet (preprocessed with PySpark)"* in the UI. Otherwise it uses `data/dataset.csv` and shows *"Data source: CSV (Pandas)"*.
+- **PySpark on Windows**: The pipeline uses Spark for all read/preprocess work; if Spark’s Parquet write fails (e.g. HADOOP_HOME/winutils unset), it falls back to writing Parquet via Pandas/PyArrow so no Hadoop setup is required.
+
 ### **Multi-tier Query Processing**
 1. **Direct Matching**: Exact disease/symptom name matching
 2. **Fuzzy Matching**: String similarity with 0.7+ threshold
-3. **Semantic Matching**: Sentence transformers for conceptual similarity
-4. **Fallback Processing**: Simple text-based matching for reliability
+3. **Semantic Matching**: Sentence transformers for conceptual similarity (when PyTorch is available)
+4. **Fallback Processing**: Simple text-based matching when advanced processor is unavailable (e.g. PyTorch DLL issues on Windows)
 
 ### **Response Generation Pipeline**
 1. **LLM Primary**: Ollama llama3.2 for intelligent responses
@@ -91,50 +104,50 @@ This biomedical query answering assistant leverages **Knowledge Graph and RAG wi
 - **Scikit-learn 1.3.2**: Machine learning utilities
 
 ### **Data Processing**
+- **PySpark**: Optional scalable preprocessing pipeline (CSV → clean → Parquet); Windows-friendly write fallback via Pandas/PyArrow
 - **NumPy 1.24.3**: Numerical computing
 - **Matplotlib 3.8.2**: Data visualization
-- **Transformers 4.35.2**: Hugging Face model integration
-- **PyTorch 2.1.0**: Deep learning framework
+- **Transformers 4.35.2**: Hugging Face model integration (optional)
+- **PyTorch 2.1.0**: Deep learning framework (optional; app falls back to simple query processor if unavailable)
 
 ## Project Structure
 
 ```
-BiomedicalAssistant/
+BioRAG/
 ├── app/                          # Application interfaces
-│   ├── cli.py                   # Command-line interface
-│   ├── streamlit_app.py         # Web interface (Streamlit)
-│   ├── run_ui.py               # UI launcher script
-│   ├── run_ui.bat              # Windows launcher
-│   └── run_ui.sh               # Linux/Mac launcher
-├── knowledge_graph/             # Knowledge graph components
-│   ├── data_processor.py       # Data preprocessing (4,920 records)
-│   ├── graph_builder.py        # NetworkX graph construction
-│   ├── embeddings.py           # Vector embeddings for 10,000+ entities
-│   ├── neo4j_builder.py        # Neo4j database integration
-│   ├── schema.py               # Graph schema definitions
-│   ├── build_knowledge_graph.py # Graph building pipeline
-│   ├── data_exploration.py     # Data analysis tools
-│   └── fix_protobuf_issue.py   # Compatibility fixes
-├── rag/                        # RAG system components
-│   ├── biomedical_rag.py       # Main RAG orchestrator
-│   ├── query_processor.py      # Advanced query processing
-│   ├── query_processor_simple.py # Fallback query processor
-│   └── response_generator.py   # LLM + rule-based responses
-├── tests/                      # Comprehensive test suite
-│   ├── test_search_neighborhood.py # Graph search tests
-│   └── test_system.py          # System integration tests
-├── data/                       # Biomedical dataset
-│   └── dataset.csv             # 4,920 records, 41 diseases, 131 symptoms
-├── docs/                       # Documentation
-│   ├── UI_IMPLEMENTATION_SUMMARY.md
-│   ├── README.md
-│   ├── Folderstructure.txt
-│   ├── Info.txt
-│   └── knowledge_graph_visualization.ipynb
-├── config.py                   # System configuration
-├── main.py                     # Application entry point
-├── requirements.txt            # Python dependencies
-└── README.md                   # This file
+│   ├── cli.py                    # Command-line interface
+│   ├── streamlit_app.py          # Web interface (Streamlit)
+│   ├── run_ui.py                 # UI launcher (run from repo root: python app/run_ui.py)
+│   ├── run_ui.bat                # Windows launcher
+│   └── run_ui.sh                 # Linux/Mac launcher
+├── pipeline/                     # Optional PySpark data preprocessing
+│   └── spark_processor.py        # CSV → clean → Parquet (Spark; Windows write fallback)
+├── knowledge_graph/              # Knowledge graph components
+│   ├── data_processor.py         # Load CSV or Parquet, build disease/symptom lists
+│   ├── graph_builder.py          # NetworkX graph construction
+│   ├── embeddings.py              # Vector embeddings for 10,000+ entities
+│   ├── neo4j_builder.py          # Neo4j database integration
+│   ├── schema.py                 # Graph schema definitions
+│   ├── build_knowledge_graph.py  # Graph building pipeline
+│   ├── data_exploration.py       # Data analysis tools
+│   └── fix_protobuf_issue.py     # Compatibility fixes
+├── rag/                          # RAG system components
+│   ├── biomedical_rag.py         # Main RAG orchestrator
+│   ├── query_processor.py        # Advanced query processing (optional; uses PyTorch)
+│   ├── query_processor_simple.py # Fallback when PyTorch unavailable
+│   └── response_generator.py     # LLM + rule-based responses
+├── tests/                        # Comprehensive test suite
+│   ├── test_search_neighborhood.py
+│   └── test_system.py
+├── data/                         # Biomedical dataset
+│   ├── dataset.csv               # Raw CSV (4,920 records, 41 diseases, 131 symptoms)
+│   └── processed/               # Optional: Parquet output from PySpark pipeline
+├── docs/                         # Documentation
+├── config.py                     # System configuration
+├── main.py                       # Application entry point
+├── run_ui.py                     # Alternative UI launcher from repo root
+├── requirements.txt              # Python dependencies
+└── README.md                     # This file
 ```
 
 ## Installation & Setup
@@ -149,7 +162,7 @@ BiomedicalAssistant/
 1. **Clone the repository**:
    ```bash
    git clone <repository-url>
-   cd BiomedicalAssistant
+   cd BioRAG
    ```
 
 2. **Install dependencies**:
@@ -167,9 +180,21 @@ BiomedicalAssistant/
    ```bash
    # Web Interface (Recommended)
    python app/run_ui.py
-   
+
+   # Or from repo root
+   python run_ui.py
+
    # Command Line Interface
    python main.py --mode cli
+   ```
+
+5. **Optional – use PySpark-preprocessed data** (recommended for large datasets):
+   ```bash
+   # Run once: CSV → cleaned Parquet (Spark; on Windows, write uses Pandas/PyArrow fallback)
+   python pipeline/spark_processor.py --input data/dataset.csv --output data/processed/
+
+   # Then start the app; it will prefer data/processed/ and show "Data source: Parquet (preprocessed with PySpark)" in the UI
+   python app/run_ui.py
    ```
 
 ##  Usage
@@ -242,13 +267,19 @@ ollama pull llama3.2
 
 The system works without Ollama using rule-based responses, maintaining >95% reliability.
 
+### **Data source and PySpark pipeline**
+
+- The app loads from **`data/processed/`** (Parquet) if present, otherwise from **`data/dataset.csv`** (CSV).
+- To use **PySpark** for preprocessing: run `python pipeline/spark_processor.py --input data/dataset.csv --output data/processed/`. All read and clean steps use Spark; on Windows, if Spark’s Parquet write fails (HADOOP_HOME/winutils), the pipeline automatically writes Parquet via Pandas/PyArrow. The UI then shows *"Data source: Parquet (preprocessed with PySpark)"* in the sidebar.
+
 ### **Custom Dataset**
 
 To use your own biomedical dataset:
 
 1. Format your CSV with columns: `Disease`, `Symptom_1`, `Symptom_2`, etc.
 2. Place it as `data/dataset.csv`
-3. Restart the application
+3. Optionally run the PySpark pipeline to produce `data/processed/`
+4. Restart the application
 
 ## Advanced Features
 
@@ -287,11 +318,13 @@ python tests/test_search_neighborhood.py
 
 ### **Common Issues**
 
-1. **Dataset not found**: Ensure `data/dataset.csv` exists (4,920 records)
+1. **Dataset not found**: Ensure `data/dataset.csv` exists, or run the PySpark pipeline to create `data/processed/`
 2. **Import errors**: Install requirements with `pip install -r requirements.txt`
 3. **LLM not working**: System works without LLM using rule-based responses
-4. **Port already in use**: Use `--port` argument to specify different port
-5. **Memory issues**: Ensure 4GB+ RAM for knowledge graph processing
+4. **PyTorch / advanced query processor unavailable** (e.g. Windows DLL error): The app automatically uses the simple text-based query processor; behaviour remains reliable
+5. **PySpark on Windows (HADOOP_HOME / winutils)**: The pipeline uses Spark for reading and preprocessing; if Spark’s Parquet write fails, it falls back to writing via Pandas/PyArrow. No Hadoop or winutils setup required
+6. **Port already in use**: Use `--port` argument to specify a different port for Streamlit
+7. **Memory issues**: Ensure 4GB+ RAM for knowledge graph processing
 
 ### **Performance Tips**
 

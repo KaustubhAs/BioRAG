@@ -4,7 +4,7 @@ from knowledge_graph.embeddings import generate_disease_embeddings, generate_sym
 from knowledge_graph.graph_builder import build_graph, visualize_graph
 
 # Define paths
-DATA_PATH = "./data/Disease-Symptom-dataset/dataset.csv"  # Adjust as needed
+DATA_PATH = "./data/processed/"  # Adjust as needed
 
 
 def main():

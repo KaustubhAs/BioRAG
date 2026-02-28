@@ -30,14 +30,22 @@ if 'query_history' not in st.session_state:
     st.session_state.query_history = []
 
 
+def _get_data_path():
+    """Prefer PySpark-processed Parquet if present, else CSV."""
+    if os.path.isdir("data/processed"):
+        return "data/processed", "Parquet (preprocessed with PySpark)"
+    if os.path.exists("data/dataset.csv"):
+        return "data/dataset.csv", "CSV (Pandas)"
+    return None, None
+
+
 def initialize_system():
     """Initialize the RAG system and knowledge graph."""
     try:
         with st.spinner("Loading biomedical knowledge base..."):
-            # Load and process data
-            DATA_PATH = "data/dataset.csv"
-            if not os.path.exists(DATA_PATH):
-                st.error(f"Dataset not found at {DATA_PATH}")
+            DATA_PATH, data_source = _get_data_path()
+            if not DATA_PATH or not os.path.exists(DATA_PATH):
+                st.error("Dataset not found. Add data/dataset.csv or run PySpark pipeline: python pipeline/spark_processor.py")
                 return False
 
             diseases, symptoms, relationships = preprocess_data(DATA_PATH)
@@ -51,8 +59,9 @@ def initialize_system():
             # Store in session state
             st.session_state.rag_system = rag_system
             st.session_state.graph = graph
+            st.session_state.data_source = data_source
 
-            st.success("System initialized successfully!")
+            st.success(f"System initialized successfully! Data source: **{data_source}**")
             return True
 
     except Exception as e:
@@ -468,6 +477,8 @@ def main():
 
     if st.session_state.rag_system is not None:
         st.sidebar.success("✅ System Ready")
+        if st.session_state.get("data_source"):
+            st.sidebar.caption(f"Data source: {st.session_state.data_source}")
     else:
         st.sidebar.error("❌ System Not Initialized")
         if st.sidebar.button("Initialize System"):
