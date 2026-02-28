@@ -6,7 +6,7 @@ from knowledge_graph.schema import GraphSchema
 def preprocess_data(data_path):
     """Load and preprocess the disease-symptom dataset."""
     import pyarrow.parquet as pq
-    
+
     # Read Parquet directory (will automatically read all partitions)
     if data_path.endswith('.csv'):
         df = pd.read_csv(data_path)

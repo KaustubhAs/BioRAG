@@ -19,11 +19,11 @@ def main():
     project_root = os.path.dirname(script_dir)
 
     try:
-        subprocess.run(
-            [sys.executable, "-m", "streamlit", "run", app_path,
-             "--server.port", "8501", "--server.address", "localhost"],
-            cwd=project_root
-        )
+        subprocess.run([
+            sys.executable, "-m", "streamlit", "run", app_path,
+            "--server.port", "8501", "--server.address", "localhost"
+        ],
+                       cwd=project_root)
     except KeyboardInterrupt:
         print("\nBiomedical Assistant UI stopped.")
     except Exception as e:

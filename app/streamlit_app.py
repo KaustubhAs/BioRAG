@@ -45,7 +45,9 @@ def initialize_system():
         with st.spinner("Loading biomedical knowledge base..."):
             DATA_PATH, data_source = _get_data_path()
             if not DATA_PATH or not os.path.exists(DATA_PATH):
-                st.error("Dataset not found. Add data/dataset.csv or run PySpark pipeline: python pipeline/spark_processor.py")
+                st.error(
+                    "Dataset not found. Add data/dataset.csv or run PySpark pipeline: python pipeline/spark_processor.py"
+                )
                 return False
 
             diseases, symptoms, relationships = preprocess_data(DATA_PATH)
@@ -61,7 +63,9 @@ def initialize_system():
             st.session_state.graph = graph
             st.session_state.data_source = data_source
 
-            st.success(f"System initialized successfully! Data source: **{data_source}**")
+            st.success(
+                f"System initialized successfully! Data source: **{data_source}**"
+            )
             return True
 
     except Exception as e:
