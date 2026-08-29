@@ -120,9 +120,9 @@ class ResponseGenerator:
         if GROQ_API_KEY:
             try:
                 from groq import Groq
-                
+
                 client = Groq(api_key=GROQ_API_KEY)
-                
+
                 prompt = f"""You are a helpful medical assistant providing information about diseases and symptoms.
                 Use ONLY the information provided in the knowledge base to answer the query.
                 If the information is not in the knowledge base, acknowledge that you don't have that information.
@@ -133,25 +133,28 @@ class ResponseGenerator:
                 {formatted_context}
                 
                 Answer:"""
-                
+
                 logger.info("Attempting Groq API response (Tier 1A)...")
                 message = client.chat.completions.create(
                     model="qwen/qwen3.8-27b",
-                    messages=[
-                        {"role": "user", "content": prompt}
-                    ],
-                    temperature=0.2
-                )
+                    messages=[{
+                        "role": "user",
+                        "content": prompt
+                    }],
+                    temperature=0.2)
                 response = message.choices[0].message.content
                 logger.info("Successfully generated response using Groq API")
                 return response.strip()
-                
+
             except ImportError:
-                logger.warning("groq library not installed. Skipping Tier 1A (Groq API).")
+                logger.warning(
+                    "groq library not installed. Skipping Tier 1A (Groq API).")
             except Exception as e:
-                logger.warning(f"Groq API call failed (Tier 1A): {e}. Falling back to Tier 1B (Ollama)...")
+                logger.warning(
+                    f"Groq API call failed (Tier 1A): {e}. Falling back to Tier 1B (Ollama)..."
+                )
                 print(f"Warning: Groq API error: {e}")
-        
+
         # ========== TIER 1B: Local Ollama (Fallback to local LLM) ==========
         if self.llm:
             prompt = f"""You are a helpful medical assistant providing information about diseases and symptoms.
@@ -171,13 +174,16 @@ class ResponseGenerator:
                 logger.info("Successfully generated response using Ollama")
                 return response.strip()
             except Exception as e:
-                logger.warning(f"Ollama LLM call failed (Tier 1B): {e}. Falling back to Tier 2 (Rule-based)...")
+                logger.warning(
+                    f"Ollama LLM call failed (Tier 1B): {e}. Falling back to Tier 2 (Rule-based)..."
+                )
                 print(f"LLM Error: {e}")
                 # Fall back to rule-based response if LLM fails
                 return self._generate_rule_based_response(context, query)
         else:
             # Fallback to rule-based response if LLM is not available
-            logger.info("No LLM available. Using Tier 2 (Rule-based) response...")
+            logger.info(
+                "No LLM available. Using Tier 2 (Rule-based) response...")
             return self._generate_rule_based_response(context, query)
 
     def _generate_rule_based_response(self, context, query):
