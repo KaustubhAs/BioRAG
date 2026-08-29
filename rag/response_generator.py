@@ -1,7 +1,30 @@
+import os
+import logging
 import networkx as nx
 from knowledge_graph.schema import GraphSchema
 from langchain_community.llms import Ollama
 from langchain_core.prompts import PromptTemplate
+
+# Optional Streamlit integration for secrets management
+try:
+    import streamlit as st
+    STREAMLIT_AVAILABLE = True
+except ImportError:
+    STREAMLIT_AVAILABLE = False
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Set up Groq API key with priority: Streamlit secrets > environment variable
+GROQ_API_KEY = None
+if STREAMLIT_AVAILABLE:
+    try:
+        GROQ_API_KEY = st.secrets.get("GROQ_API_KEY")
+    except Exception:
+        GROQ_API_KEY = None
+
+if not GROQ_API_KEY:
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 
 class ResponseGenerator:
@@ -77,7 +100,13 @@ class ResponseGenerator:
         return formatted_context
 
     def generate_response(self, query, subgraph):
-        """Generate a response based on the query and retrieved subgraph."""
+        """Generate a response based on the query and retrieved subgraph.
+        
+        Multi-tier response generation:
+        Tier 1A: Groq API (llama-3.1-8b-instant) if GROQ_API_KEY available
+        Tier 1B: Local Ollama (llama3.2) if available
+        Tier 2: Rule-based response generation
+        """
         context = self.extract_context(subgraph, query)
 
         # If context is a string, it's an error message
@@ -87,7 +116,43 @@ class ResponseGenerator:
         # Format context for LLM
         formatted_context = self.format_context_for_llm(context)
 
-        # If LLM is available, use it to generate a response
+        # ========== TIER 1A: Groq API (Zero-cost cloud deployment) ==========
+        if GROQ_API_KEY:
+            try:
+                from groq import Groq
+                
+                client = Groq(api_key=GROQ_API_KEY)
+                
+                prompt = f"""You are a helpful medical assistant providing information about diseases and symptoms.
+                Use ONLY the information provided in the knowledge base to answer the query.
+                If the information is not in the knowledge base, acknowledge that you don't have that information.
+                Format your response in a clear, concise manner.
+                
+                Query: {query}
+                
+                {formatted_context}
+                
+                Answer:"""
+                
+                logger.info("Attempting Groq API response (Tier 1A)...")
+                message = client.chat.completions.create(
+                    model="qwen/qwen3.8-27b",
+                    messages=[
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.2
+                )
+                response = message.choices[0].message.content
+                logger.info("Successfully generated response using Groq API")
+                return response.strip()
+                
+            except ImportError:
+                logger.warning("groq library not installed. Skipping Tier 1A (Groq API).")
+            except Exception as e:
+                logger.warning(f"Groq API call failed (Tier 1A): {e}. Falling back to Tier 1B (Ollama)...")
+                print(f"Warning: Groq API error: {e}")
+        
+        # ========== TIER 1B: Local Ollama (Fallback to local LLM) ==========
         if self.llm:
             prompt = f"""You are a helpful medical assistant providing information about diseases and symptoms.
             Use ONLY the information provided in the knowledge base to answer the query.
@@ -101,14 +166,18 @@ class ResponseGenerator:
             Answer:"""
 
             try:
+                logger.info("Attempting Ollama response (Tier 1B)...")
                 response = self.llm.invoke(prompt)
+                logger.info("Successfully generated response using Ollama")
                 return response.strip()
             except Exception as e:
+                logger.warning(f"Ollama LLM call failed (Tier 1B): {e}. Falling back to Tier 2 (Rule-based)...")
                 print(f"LLM Error: {e}")
                 # Fall back to rule-based response if LLM fails
                 return self._generate_rule_based_response(context, query)
         else:
             # Fallback to rule-based response if LLM is not available
+            logger.info("No LLM available. Using Tier 2 (Rule-based) response...")
             return self._generate_rule_based_response(context, query)
 
     def _generate_rule_based_response(self, context, query):

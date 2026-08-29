@@ -78,34 +78,44 @@ def preprocess_data(df):
     return df
 
 
+ def write_parquet(df, output_path, partition_col="Disease"):
+    """
+    Writes the processed Spark DataFrame to Parquet using native PySpark distributed write.
+    Replaces df.toPandas() and pyarrow usage with pure Spark operations for true distributed processing.
+    Logs errors and re-raises on failure.
+    """
+    try:
+        logger.info(f"Writing Parquet data to {output_path} (distributed Spark write)...")
+        
+        if partition_col in df.columns:
+            logger.info(f"Partitioning by column: {partition_col}")
+            df.repartition(partition_col) \
+              .write \
+              .mode("overwrite") \
+              .partitionBy(partition_col) \
+              .parquet(output_path)
+        else:
+            logger.warning(
+                f"Column '{partition_col}' not found in DataFrame. "
+                f"Falling back to unpartitioned write with 10 repartitions."
+            )
+            df.repartition(10) \
+              .write \
+              .mode("overwrite") \
+              .parquet(output_path)
+        
+        logger.info("Parquet write completed successfully.")
+        
+    except Exception as e:
+        logger.error(f"Parquet write operation failed: {str(e)}", exc_info=True)
+        raise
+
+
 def write_parquet_spark(df, output_path, partition_col="Disease"):
     """
-    Writes the processed Spark DataFrame to Parquet using Spark.
-    On Windows this often fails due to HADOOP_HOME/winutils; use write_parquet_pandas as fallback.
+    Alias for write_parquet() to maintain backward compatibility.
     """
-    if partition_col in df.columns:
-        df.repartition(partition_col) \
-          .write \
-          .mode("overwrite") \
-          .partitionBy(partition_col) \
-          .parquet(output_path)
-    else:
-        df.write.mode("overwrite").parquet(output_path)
-
-
-def write_parquet_pandas(df, output_path):
-    """
-    Writes the processed Spark DataFrame to Parquet using Pandas/PyArrow.
-    Used on Windows when Spark's write fails (HADOOP_HOME/winutils not set).
-    """
-    logger.info(
-        "Converting to Pandas and writing Parquet (Windows-friendly path)...")
-    pdf = df.toPandas()
-    os.makedirs(output_path, exist_ok=True)
-    # Single file in the directory so pd.read_parquet(output_path) works
-    single_path = os.path.join(output_path, "data.parquet")
-    pdf.to_parquet(single_path, index=False)
-    logger.info(f"Wrote {single_path}")
+    return write_parquet(df, output_path, partition_col)
 
 
 def main():
@@ -138,23 +148,8 @@ def main():
         # Preprocess
         df_clean = preprocess_data(df)
 
-        # Export: try Spark write first; on Windows (HADOOP_HOME/winutils missing) use Pandas
-        try:
-            logger.info(f"Writing data to {args.output} (Spark)...")
-            write_parquet_spark(df_clean, args.output)
-            logger.info("Write operation completed successfully (Spark).")
-        except Exception as e:
-            from py4j.protocol import Py4JJavaError
-            if isinstance(e, Py4JJavaError) or "HADOOP_HOME" in str(
-                    e) or "winutils" in str(e).lower():
-                logger.warning(
-                    "Spark write failed (Windows/HADOOP_HOME). Using Pandas/PyArrow for output."
-                )
-                write_parquet_pandas(df_clean, args.output)
-                logger.info(
-                    "Write operation completed successfully (Pandas/PyArrow).")
-            else:
-                raise
+        # Export: use native Spark distributed write
+        write_parquet(df_clean, args.output)
 
     except Exception as e:
         logger.error(f"Pipeline failed: {str(e)}", exc_info=True)
