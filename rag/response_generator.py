@@ -15,17 +15,6 @@ except ImportError:
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Set up Groq API key with priority: Streamlit secrets > environment variable
-GROQ_API_KEY = None
-if STREAMLIT_AVAILABLE:
-    try:
-        GROQ_API_KEY = st.secrets.get("GROQ_API_KEY")
-    except Exception:
-        GROQ_API_KEY = None
-
-if not GROQ_API_KEY:
-    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
 
 class ResponseGenerator:
 
@@ -116,12 +105,22 @@ class ResponseGenerator:
         # Format context for LLM
         formatted_context = self.format_context_for_llm(context)
 
+        # Dynamically fetch the Groq API key
+        current_groq_key = None
+        if STREAMLIT_AVAILABLE:
+            try:
+                current_groq_key = st.secrets.get("GROQ_API_KEY")
+            except Exception:
+                pass
+        if not current_groq_key:
+            current_groq_key = os.getenv("GROQ_API_KEY")
+
         # ========== TIER 1A: Groq API (Zero-cost cloud deployment) ==========
-        if GROQ_API_KEY:
+        if current_groq_key:
             try:
                 from groq import Groq
 
-                client = Groq(api_key=GROQ_API_KEY)
+                client = Groq(api_key=current_groq_key)
 
                 prompt = f"""You are a helpful medical assistant providing information about diseases and symptoms.
                 Use ONLY the information provided in the knowledge base to answer the query.
@@ -136,7 +135,7 @@ class ResponseGenerator:
 
                 logger.info("Attempting Groq API response (Tier 1A)...")
                 message = client.chat.completions.create(
-                    model="qwen/qwen3.8-27b",
+                    model="llama-3.1-8b-instant",
                     messages=[{
                         "role": "user",
                         "content": prompt
