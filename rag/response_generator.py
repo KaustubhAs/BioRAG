@@ -92,7 +92,7 @@ class ResponseGenerator:
         """Generate a response based on the query and retrieved subgraph.
         
         Multi-tier response generation:
-        Tier 1A: Groq API (llama-3.1-8b-instant) if GROQ_API_KEY available
+        Tier 1A: Groq API (qwen/qwen3.8-27b) if GROQ_API_KEY available
         Tier 1B: Local Ollama (llama3.2) if available
         Tier 2: Rule-based response generation
         """
@@ -135,7 +135,7 @@ class ResponseGenerator:
 
                 logger.info("Attempting Groq API response (Tier 1A)...")
                 message = client.chat.completions.create(
-                    model="llama-3.1-8b-instant",
+                    model="qwen/qwen3.8-27b",
                     messages=[{
                         "role": "user",
                         "content": prompt
